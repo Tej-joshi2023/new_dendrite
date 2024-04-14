@@ -1,0 +1,132 @@
+import json
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.feature_selection import SelectFromModel
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import mean_squared_error, r2_score
+
+def parse_json(json_file):
+ with open(json_file, 'r') as f:
+     json_data = json.load(f)
+ # Extract relevant information from JSON
+ dataset_name = json_data['dataset_name']
+ target_variable = json_data['target_variable']
+ prediction_type = json_data['prediction_type']
+ feature_handling = json_data['feature_handling']
+ feature_reduction_method = json_data['feature_reduction_method']
+ selected_algorithms = json_data['selected_algorithms']
+ hyperparameters = json_data['hyperparameters']
+ return dataset_name, target_variable, prediction_type, feature_handling
+
+def parse_json(json_file):
+ with open(json_file, 'r') as f:
+     json_data = json.load(f)
+ # Extract relevant information from JSON
+ dataset_name = json_data['dataset_name']
+ target_variable = json_data['target_variable']
+ prediction_type = json_data['prediction_type']
+ feature_handling = json_data['feature_handling']
+ feature_reduction_method = json_data['feature_reduction_method']
+ selected_algorithms = json_data['selected_algorithms']
+ hyperparameters = json_data['hyperparameters']
+ return dataset_name, target_variable, prediction_type, feature_handling
+
+def feature_reduction(X_train, X_test, y_train, feature_reduction_method):
+ if feature_reduction_method == 'tree_based':
+
+      # Use RandomForestRegressor for feature selection
+       selector = SelectFromModel(RandomForestRegressor())
+       X_train_selected = selector.fit_transform(X_train, y_train)
+       X_test_selected = selector.transform(X_test)
+       return X_train_selected, X_test_selected
+ else:
+
+    return X_train, X_test # No feature reduction
+
+from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
+from sklearn.svm import SVR, SVC
+from sklearn.neighbors import KNeighborsRegressor, KNeighborsClassifier
+from sklearn.linear_model import SGDRegressor, SGDClassifier
+from sklearn.ensemble import ExtraTreesRegressor, ExtraTreesClassifier
+from sklearn.neural_network import MLPRegressor, MLPClassifier
+from sklearn.kernel_ridge import KernelRidge
+from xgboost import XGBRegressor, XGBClassifier
+def create_models(selected_algorithms):
+ models = []
+ for algorithm in selected_algorithms:
+
+    if algorithm == 'LinearRegression':
+
+        models.append(('Linear Regression', LinearRegression()))
+    elif algorithm == 'LogisticRegression':
+        models.append(('Logistic Regression', LogisticRegression()))
+    elif algorithm == 'RandomForestRegressor':
+        models.append(('Random Forest Regressor', RandomForestRegressor()))
+    elif algorithm == 'RandomForestClassifier':
+        models.append(('Random Forest Classifier', RandomForestClassifier()))
+    elif algorithm == 'GradientBoostingRegressor':
+        models.append(('Gradient Boosting Regressor', GradientBoostingRegressor()))
+    elif algorithm == 'GradientBoostingClassifier':
+        models.append(('Gradient Boosting Classifier', GradientBoostingClassifier()))
+    elif algorithm == 'DecisionTreeRegressor':
+        models.append(('Decision Tree Regressor', DecisionTreeRegressor()))
+    elif algorithm == 'DecisionTreeClassifier':
+        models.append(('Decision Tree Classifier', DecisionTreeClassifier()))
+    elif algorithm == 'SVR':
+        models.append(('Support Vector Regressor', SVR()))
+    elif algorithm == 'SVC':
+        models.append(('Support Vector Classifier', SVC()))
+    elif algorithm == 'KNeighborsRegressor':
+        models.append(('K Neighbors Regressor', KNeighborsRegressor()))
+    elif algorithm == 'KNeighborsClassifier':
+        models.append(('K Neighbors Classifier', KNeighborsClassifier()))
+    elif algorithm == 'SGDRegressor':
+        models.append(('Stochastic Gradient Descent Regressor', SGDRegressor()))
+    elif algorithm == 'SGDClassifier':
+        models.append(('Stochastic Gradient Descent Classifier', SGDClassifier()))
+    elif algorithm == 'ExtraTreesRegressor':
+        models.append(('Extra Trees Regressor', ExtraTreesRegressor()))
+    elif algorithm == 'ExtraTreesClassifier':
+        models.append(('Extra Trees Classifier', ExtraTreesClassifier()))
+    elif algorithm == 'MLPRegressor':
+        models.append(('Multi-layer Perceptron Regressor', MLPRegressor()))
+    elif algorithm == 'MLPClassifier':
+        models.append(('Multi-layer Perceptron Classifier', MLPClassifier()))
+    elif algorithm == 'KernelRidge':
+        models.append(('Kernel Ridge', KernelRidge()))
+    elif algorithm == 'XGBRegressor':
+        models.append(('XGBoost Regressor', XGBRegressor()))
+    elif algorithm == 'XGBClassifier':
+        models.append(('XGBoost Classifier', XGBClassifier()))
+ # Add more models as needed
+ return models
+
+from sklearn.model_selection import GridSearchCV
+def hyperparameter_tuning(models, hyperparameters, X_train, y_train):
+ tuned_models = []
+ for name, model in models:
+    if name in hyperparameters:
+
+        param_grid = hyperparameters[name]
+        grid_search = GridSearchCV(model, param_grid, cv=5, scoring='neg_mean_squared_error')
+        grid_search.fit(X_train, y_train)
+        tuned_models.append((name, grid_search.best_estimator_))
+    else:
+        tuned_models.append((name, model))
+ return tuned_models
+
+
+def evaluate_models(models, X_test, y_test):
+ results = {}
+ for name, model in models:
+
+    y_pred = model.predict(X_test)
+    mse = mean_squared_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
+    results[name] = {'Mean Squared Error': mse, 'R-squared': r2}
+ return results
